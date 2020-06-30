@@ -1,5 +1,6 @@
 package org.freechains.store
 
+import org.freechains.cli.main_cli
 import org.freechains.common.*
 import org.freechains.cli.main_cli_assert
 import java.io.DataInputStream
@@ -11,20 +12,14 @@ class Store (chain: String, port: Int) {
     private var last: String? = null
 
     val chain = chain
-    val port  = "--port=$port"
+    val port  = port
+    val port_ = "--port=$port"
 
     @get:Synchronized
     val data : MutableMap<String,MutableMap<String,String>> = mutableMapOf()
 
     @get:Synchronized
-
-    val cbs: MutableSet<(String,String,String)->Unit> = mutableSetOf()
-
-    @Synchronized
-    fun store (v1: String, v2: String, v3: String) {
-        main_cli_assert(arrayOf(port, "chain", this.chain, "post", "inline", "$v1 $v2 $v3"))
-        this.store_(false, v1, v2, v3)
-    }
+    val cbs: MutableList<(String,String,String)->Unit> = mutableListOf()
 
     init {
         thread {
@@ -37,6 +32,12 @@ class Store (chain: String, port: Int) {
                 reader.readLineX().listSplit()
             }
         }
+    }
+
+    @Synchronized
+    fun store (v1: String, v2: String, v3: String) {
+        main_cli_assert(arrayOf(port_, "chain", this.chain, "post", "inline", "$v1 $v2 $v3"))
+        this.store_(false, v1, v2, v3)
     }
 
     private fun store_ (call: Boolean, v1: String, v2: String, v3: String) {
@@ -59,12 +60,12 @@ class Store (chain: String, port: Int) {
     private fun update () {
         //println(">>> last = $last")
         if (this.last == null) {
-            this.last = main_cli_assert(arrayOf(port, "chain", this.chain, "genesis"))
+            this.last = main_cli_assert(arrayOf(port_, "chain", this.chain, "genesis"))
         }
 
-        val hs = main_cli_assert(arrayOf(port, "chain", this.chain, "traverse", "all", this.last!!)).listSplit()
+        val hs = main_cli_assert(arrayOf(port_, "chain", this.chain, "traverse", "all", this.last!!)).listSplit()
         for (h in hs) {
-            val v = main_cli_assert(arrayOf(port, "chain", this.chain, "get", "payload", h))
+            val v = main_cli_assert(arrayOf(port_, "chain", this.chain, "get", "payload", h))
             //println(">>> v = $v")
             val cmd = v.split(' ')
             assert_(cmd.size == 3) { "invalid store command" }
