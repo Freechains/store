@@ -40,6 +40,12 @@ class Store (chain: String, port: Int) {
         this.store_(false, v1, v2, v3)
     }
 
+    fun getKeys (key: String) : List<String> {
+        return this.data[key].let {
+            if (it == null) emptyList() else it.keys.toList()
+        }
+    }
+
     private fun store_ (call: Boolean, v1: String, v2: String, v3: String) {
         if (!this.data.containsKey(v1)) {
             this.data.set(v1, mutableMapOf())
