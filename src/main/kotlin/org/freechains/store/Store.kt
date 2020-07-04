@@ -46,6 +46,12 @@ class Store (chain: String, port: Int) {
         }
     }
 
+    fun getPairs (key: String) : List<Pair<String,String>> {
+        return this.data[key].let {
+            if (it == null) emptyList() else it.toList()
+        }
+    }
+
     private fun store_ (call: Boolean, v1: String, v2: String, v3: String) {
         if (!this.data.containsKey(v1)) {
             this.data.set(v1, mutableMapOf())
@@ -66,6 +72,7 @@ class Store (chain: String, port: Int) {
     private fun update () {
         //println(">>> last = $last")
         if (this.last == null) {
+            //println(">>> update ${this.chain} // ${main_cli_assert(arrayOf(port_, "chains", "list"))}")
             this.last = main_cli_assert(arrayOf(port_, "chain", this.chain, "genesis"))
         }
 
