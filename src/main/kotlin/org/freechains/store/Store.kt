@@ -22,14 +22,15 @@ class Store (chain: String, port: Int) {
     val cbs: MutableList<(String,String,String)->Unit> = mutableListOf()
 
     init {
+        this.update()
         thread {
             val socket = Socket("localhost", port)
             val writer = DataOutputStream(socket.getOutputStream()!!)
             val reader = DataInputStream(socket.getInputStream()!!)
             writer.writeLineX("$PRE chain $chain listen")
             while (true) {
-                this.update()
                 reader.readLineX().listSplit()
+                this.update()
             }
         }
     }
