@@ -24,13 +24,17 @@ class Store (chain: String, port: Int) {
     init {
         this.update()
         thread {
-            val socket = Socket("localhost", port)
-            val writer = DataOutputStream(socket.getOutputStream()!!)
-            val reader = DataInputStream(socket.getInputStream()!!)
-            writer.writeLineX("$PRE chain $chain listen")
-            while (true) {
-                reader.readLineX().listSplit()
-                this.update()
+            try {
+                val socket = Socket("localhost", port)
+                val writer = DataOutputStream(socket.getOutputStream()!!)
+                val reader = DataInputStream(socket.getInputStream()!!)
+                writer.writeLineX("$PRE chain $chain listen")
+                while (true) {
+                    reader.readLineX().listSplit()
+                    this.update()
+                }
+            } catch (e: java.io.EOFException) {
+                System.err.println("! connection closed")
             }
         }
     }
